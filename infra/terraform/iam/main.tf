@@ -9,7 +9,6 @@ resource "aws_iam_role" "lambda_execution_role" {
         Effect = "Allow",
         Principal = {
           Service = [
-            "lambda.amazonaws.com",
             "apigateway.amazonaws.com"
           ]
         }
@@ -17,7 +16,7 @@ resource "aws_iam_role" "lambda_execution_role" {
     ]
   })
 }
-
+/*
 resource "aws_iam_policy" "lambda_policy" {
   name        = "MyLambdaPolicy"
   description = "Policy for Lambda function"
@@ -71,3 +70,4 @@ resource "aws_iam_role_policy" "invocation_policy" {
   role   = aws_iam_role.lambda_execution_role.id
   policy = data.aws_iam_policy_document.invocation_policy.json
 }
+*/

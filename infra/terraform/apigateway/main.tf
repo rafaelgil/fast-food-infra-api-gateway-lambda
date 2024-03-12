@@ -3,8 +3,7 @@ resource "aws_api_gateway_rest_api" "api_fast_food" {
   description = "API Gateway para API REST fast-food"
 }
 
-# /cliente
-
+# /cliente.
 resource "aws_api_gateway_resource" "cliente" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   parent_id   = aws_api_gateway_rest_api.api_fast_food.root_resource_id
@@ -24,17 +23,17 @@ resource "aws_api_gateway_integration" "cadastrar_cliente" {
   http_method             = aws_api_gateway_method.cadastrar_cliente.http_method
   integration_http_method = "POST"
   type                    = "HTTP_PROXY"
-  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
+  uri                     = var.uri_cliente_api
+
 }
 
 # /cliente?cpf=55568254970
-
 resource "aws_api_gateway_method" "busca_cliente" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   resource_id = aws_api_gateway_resource.cliente.id
   http_method = "GET"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  authorization = "NONE"
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
   request_parameters = {
     "method.request.querystring.cpf" = true
   }
@@ -46,11 +45,36 @@ resource "aws_api_gateway_integration" "busca_cliente" {
   http_method             = aws_api_gateway_method.busca_cliente.http_method
   integration_http_method = "GET"
   type                    = "HTTP_PROXY"
-  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
+  uri                     = var.uri_cliente_api
+}
+
+// api gateway para get /cliente/{id}
+resource "aws_api_gateway_resource" "cliente_id" {
+  rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
+  parent_id   = aws_api_gateway_resource.cliente.id
+  path_part   = "{id+}"
+}
+
+resource "aws_api_gateway_method" "busca_cliente_id" {
+  rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
+  resource_id = aws_api_gateway_resource.cliente_id.id
+  http_method = "GET"
+  authorization = "NONE"
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
+}
+
+resource "aws_api_gateway_integration" "busca_cliente_id" {
+  rest_api_id             = aws_api_gateway_rest_api.api_fast_food.id
+  resource_id             = aws_api_gateway_resource.cliente_id.id
+  http_method             = aws_api_gateway_method.busca_cliente_id.http_method
+  integration_http_method = "GET"
+  type                    = "HTTP_PROXY"
+  uri                     = "${var.uri_cliente_api}/{id+}"
 }
 
 # /autenticar?cpf=55568254970
 
+/*
 resource "aws_api_gateway_resource" "autenticar" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   parent_id   = aws_api_gateway_rest_api.api_fast_food.root_resource_id
@@ -73,11 +97,11 @@ resource "aws_api_gateway_integration" "autenticar_cliente" {
   http_method             = aws_api_gateway_method.autenticar_cliente.http_method
   integration_http_method = "GET"
   type                    = "HTTP_PROXY"
-  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
+  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com/autenticar"
 }
-
+*/
 # /checkouts/webhook/pagar/{qrCodeId}
-
+/*
 resource "aws_api_gateway_resource" "checkouts" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   parent_id   = aws_api_gateway_rest_api.api_fast_food.root_resource_id
@@ -107,7 +131,7 @@ resource "aws_api_gateway_method" "checkouts_id" {
   resource_id = aws_api_gateway_resource.checkouts_id.id
   http_method = "PUT"
   authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "checkouts_id" {
@@ -116,7 +140,7 @@ resource "aws_api_gateway_integration" "checkouts_id" {
   http_method             = aws_api_gateway_method.checkouts_id.http_method
   integration_http_method = "PUT"
   type                    = "HTTP_PROXY"
-  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
+  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com/checkouts/webhook/pagar/{id+}"
 }
 
 # /pedidos/checkout
@@ -138,7 +162,7 @@ resource "aws_api_gateway_method" "checkout" {
   resource_id = aws_api_gateway_resource.checkout.id
   http_method = "POST"
   authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "checkout" {
@@ -157,7 +181,7 @@ resource "aws_api_gateway_method" "pedidos" {
   resource_id = aws_api_gateway_resource.pedidos.id
   http_method = "GET"
   authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "pedidos" {
@@ -182,7 +206,7 @@ resource "aws_api_gateway_method" "pedidos_id" {
   resource_id = aws_api_gateway_resource.pedidos_id.id
   http_method = "GET"
   authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "pedidos_id" {
@@ -213,7 +237,7 @@ resource "aws_api_gateway_method" "status_id" {
   resource_id = aws_api_gateway_resource.status_id.id
   http_method = "GET"
   authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "status_id" {
@@ -250,7 +274,7 @@ resource "aws_api_gateway_method" "preparacao_id" {
   resource_id = aws_api_gateway_resource.preparacao_id.id
   http_method = "PUT"
   authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "preparacao_id" {
@@ -281,7 +305,7 @@ resource "aws_api_gateway_method" "pronto_id" {
   resource_id = aws_api_gateway_resource.pronto_id.id
   http_method = "PUT"
   authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "pronto_id" {
@@ -312,7 +336,7 @@ resource "aws_api_gateway_method" "confirmar_entrega_id" {
   resource_id = aws_api_gateway_resource.confirmar_entrega_id.id
   http_method = "PUT"
   authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "confirmar_entrega_id" {
@@ -324,8 +348,9 @@ resource "aws_api_gateway_integration" "confirmar_entrega_id" {
   uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
 }
 
-# /produto
+*/
 
+# /produto
 resource "aws_api_gateway_resource" "produto" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   parent_id   = aws_api_gateway_rest_api.api_fast_food.root_resource_id
@@ -336,8 +361,8 @@ resource "aws_api_gateway_method" "produto" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   resource_id = aws_api_gateway_resource.produto.id
   http_method = "POST"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  authorization = "NONE"
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "produto" {
@@ -346,11 +371,10 @@ resource "aws_api_gateway_integration" "produto" {
   http_method             = aws_api_gateway_method.produto.http_method
   integration_http_method = "POST"
   type                    = "HTTP_PROXY"
-  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
+  uri                     = var.uri_produto_api
 }
 
 # /produto/{id}
-
 resource "aws_api_gateway_resource" "produto_id" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   parent_id   = aws_api_gateway_resource.produto.id
@@ -361,8 +385,8 @@ resource "aws_api_gateway_method" "produto_id" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   resource_id = aws_api_gateway_resource.produto_id.id
   http_method = "PUT"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  authorization = "NONE"
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "produto_id" {
@@ -371,15 +395,15 @@ resource "aws_api_gateway_integration" "produto_id" {
   http_method             = aws_api_gateway_method.produto_id.http_method
   integration_http_method = "PUT"
   type                    = "HTTP_PROXY"
-  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
+  uri                     = "${var.uri_produto_api}/{id+}"
 }
 
 resource "aws_api_gateway_method" "deleta_produto_id" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   resource_id = aws_api_gateway_resource.produto_id.id
   http_method = "DELETE"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  authorization = "NONE"
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
 }
 
 resource "aws_api_gateway_integration" "deleta_produto_id" {
@@ -388,11 +412,28 @@ resource "aws_api_gateway_integration" "deleta_produto_id" {
   http_method             = aws_api_gateway_method.deleta_produto_id.http_method
   integration_http_method = "DELETE"
   type                    = "HTTP_PROXY"
-  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
+  uri                     = "${var.uri_produto_api}/{id+}"
+}
+
+// get produto by id
+resource "aws_api_gateway_method" "get_produto_id" {
+  rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
+  resource_id = aws_api_gateway_resource.produto_id.id
+  http_method = "GET"
+  authorization = "NONE"
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
+}
+
+resource "aws_api_gateway_integration" "get_produto_id" {
+  rest_api_id             = aws_api_gateway_rest_api.api_fast_food.id
+  resource_id             = aws_api_gateway_resource.produto_id.id
+  http_method             = aws_api_gateway_method.get_produto_id.http_method
+  integration_http_method = "GET"
+  type                    = "HTTP_PROXY"
+  uri                     = "${var.uri_produto_api}/{id+}"
 }
 
 # /produto/categoria
-
 resource "aws_api_gateway_resource" "categoria" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   parent_id   = aws_api_gateway_resource.produto.id
@@ -403,8 +444,12 @@ resource "aws_api_gateway_method" "categoria" {
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   resource_id = aws_api_gateway_resource.categoria.id
   http_method = "GET"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.custom.id
+  authorization = "NONE"
+  //authorizer_id = aws_api_gateway_authorizer.custom.id
+
+  request_parameters = {
+    "method.request.querystring.nome" = true
+  }
 }
 
 resource "aws_api_gateway_integration" "categoria" {
@@ -413,7 +458,7 @@ resource "aws_api_gateway_integration" "categoria" {
   http_method             = aws_api_gateway_method.categoria.http_method
   integration_http_method = "GET"
   type                    = "HTTP_PROXY"
-  uri                     = "http://fast-food-alb-fast-food-app-1309163261.us-east-1.elb.amazonaws.com"
+  uri                     = "${var.uri_produto_api}/categoria"
 }
 
 resource "aws_api_gateway_deployment" "api_fast_food_deployment" {
@@ -423,33 +468,6 @@ resource "aws_api_gateway_deployment" "api_fast_food_deployment" {
 
     aws_api_gateway_method.busca_cliente,
     aws_api_gateway_integration.busca_cliente,
-
-    aws_api_gateway_method.autenticar_cliente,
-    aws_api_gateway_integration.autenticar_cliente,
-
-    aws_api_gateway_method.checkouts_id,
-    aws_api_gateway_integration.checkouts_id,
-
-    aws_api_gateway_method.checkout,
-    aws_api_gateway_integration.checkout,
-
-    aws_api_gateway_method.pedidos,
-    aws_api_gateway_integration.pedidos,
-
-    aws_api_gateway_method.pedidos_id,
-    aws_api_gateway_integration.pedidos_id,
-
-    aws_api_gateway_method.status_id,
-    aws_api_gateway_integration.status_id,
-
-    aws_api_gateway_method.preparacao_id,
-    aws_api_gateway_integration.preparacao_id,
-
-    aws_api_gateway_method.pronto_id,
-    aws_api_gateway_integration.pronto_id,
-
-    aws_api_gateway_method.confirmar_entrega_id,
-    aws_api_gateway_integration.confirmar_entrega_id,
 
     aws_api_gateway_method.produto,
     aws_api_gateway_integration.produto,
@@ -462,11 +480,15 @@ resource "aws_api_gateway_deployment" "api_fast_food_deployment" {
 
     aws_api_gateway_method.categoria,
     aws_api_gateway_integration.categoria,
+
+    aws_api_gateway_method.get_produto_id,
+    aws_api_gateway_integration.get_produto_id,
     ]
   rest_api_id = aws_api_gateway_rest_api.api_fast_food.id
   stage_name = "dev"
 }
 
+/*
 resource "aws_api_gateway_authorizer" "custom" {
   name                   = "custom-authorizer"
   rest_api_id            = aws_api_gateway_rest_api.api_fast_food.id
@@ -475,3 +497,4 @@ resource "aws_api_gateway_authorizer" "custom" {
   identity_source                  = "method.request.header.Authorization"
   authorizer_result_ttl_in_seconds = 0
 }
+*/
